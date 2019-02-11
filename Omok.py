@@ -1,8 +1,6 @@
+import OmokValue
 class Omok:
     def __init__(self):
-        self.NONE = 0
-        self.BLACK = 1
-        self.WHITE = 0
         self.size = 19
         self.newGame()
 
@@ -13,7 +11,7 @@ class Omok:
                 nowStatus = self.board[row][col] % 2
                 if not self.board[row][col]:
                     displayString += " "
-                elif nowStatus == self.WHITE:
+                elif nowStatus == OmokValue.WHITE:
                     displayString += "O"
                 else:
                     displayString += "X"
@@ -26,19 +24,45 @@ class Omok:
         return displayString
 
     def newGame(self):
-        self.board = [[self.NONE for col in range(self.size)] for row in range(self.size)]
+        self.board = [[OmokValue.NONE for col in range(self.size)] for row in range(self.size)]
         self.turn = 1
 
-    def checkValid(self, r, c):
-        if self.turn == 1 and (r != 9 or c != 9):
-            return False
+    def isValidPosition(self, r, c):
         if r < 0 or r > 18:
             return False
         if c < 0 or c > 18:
             return False
+        return True
+    
+    def countStone(self, r, c, dir_x, dir_y):
+        count = [0, 0]
+        jump = 0
+        while jump < 2:
+            r, c = r + dir_x, c + dir_y
+            if not self.isValidPosition(r, c):
+                break
+            if not self.board[r][c]:
+                jump += 1
+        return count
+
+    def checkValid(self, r, c):
+        # start position
+        if self.turn == 1 and (r != 9 or c != 9):
+            return False
+        
+        # check about position is valid
+        if not self.isValidPosition(r, c):
+            return False
+
         # if stone put before
         if self.board[r][c]:
             return False
+
+        directions = [[0, 1], [1, 1], [1, 0], [1, -1]]
+        case3x3, case4x4 = 0, 0
+        for dir_x, dir_y in directions:
+            positive, negative = self.countStone(r, c, dir_x, dir_y), self.countStone(r, c, -dir_x, -dir_y)
+
         return True
 
     def changeTurn(self):
